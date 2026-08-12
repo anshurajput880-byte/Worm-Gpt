@@ -1,0 +1,6 @@
+./
+├── app.py          ✅ (with open('index.html') not render_template)
+├── index.html      ✅ (in root directory)
+├── requirements.txt ✅ (flask, requests, gunicorn)
+├── start.sh        ✅ (entrypoint)
+└── structure.txt   ✅ (optional)

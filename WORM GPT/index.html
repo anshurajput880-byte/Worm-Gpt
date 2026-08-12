@@ -1,0 +1,1149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>🕷️ NeoChat — Hacker AI Interface</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap');
+
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #0d0d1a;
+            --bg-panel: #111122;
+            --border-glow: #00ff41;
+            --text-primary: #e0e8f0;
+            --text-secondary: #00ff41;
+            --text-muted: #4a7a5a;
+            --accent-cyan: #00d4ff;
+            --accent-purple: #7b2ffc;
+            --accent-green: #00ff41;
+            --shadow-glow: 0 0 20px rgba(0, 255, 65, 0.1);
+            --danger: #ff1744;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Share Tech Mono', monospace;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        /* Matrix Rain Background */
+        #matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            opacity: 0.08;
+            pointer-events: none;
+        }
+
+        .app {
+            width: min(1000px, 98vw);
+            height: 94vh;
+            display: flex;
+            flex-direction: column;
+            background: var(--bg-secondary);
+            border: 1px solid rgba(0, 255, 65, 0.2);
+            border-radius: 20px;
+            position: relative;
+            z-index: 1;
+            box-shadow: 0 0 60px rgba(0, 255, 65, 0.05), inset 0 0 60px rgba(0, 255, 65, 0.02);
+            backdrop-filter: blur(10px);
+            overflow: hidden;
+        }
+
+        /* Animated scanline overlay */
+        .app::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(0deg,
+                    transparent,
+                    transparent 2px,
+                    rgba(0, 255, 65, 0.01) 2px,
+                    rgba(0, 255, 65, 0.01) 4px);
+            pointer-events: none;
+            z-index: 10;
+            animation: scanline 8s linear infinite;
+        }
+
+        @keyframes scanline {
+            0% {
+                transform: translateY(0);
+            }
+            100% {
+                transform: translateY(100%);
+            }
+        }
+
+        /* Top Bar - Hacker Style */
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+            border-bottom: 1px solid rgba(0, 255, 65, 0.15);
+            background: rgba(17, 17, 34, 0.9);
+            backdrop-filter: blur(10px);
+            position: relative;
+            z-index: 5;
+            flex-shrink: 0;
+        }
+
+        .brand {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .logo-container {
+            position: relative;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo {
+            font-size: 32px;
+            animation: pulse-glow 2s ease-in-out infinite;
+            filter: drop-shadow(0 0 10px rgba(0, 255, 65, 0.3));
+        }
+
+        @keyframes pulse-glow {
+            0%,
+            100% {
+                filter: drop-shadow(0 0 10px rgba(0, 255, 65, 0.3));
+            }
+            50% {
+                filter: drop-shadow(0 0 25px rgba(0, 255, 65, 0.6));
+            }
+        }
+
+        .logo-ring {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border: 1px solid var(--accent-green);
+            border-radius: 50%;
+            animation: spin 6s linear infinite;
+        }
+
+        .logo-ring::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: 50%;
+            width: 4px;
+            height: 4px;
+            background: var(--accent-green);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--accent-green);
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .brand-text h1 {
+            font-family: 'Orbitron', monospace;
+            font-size: 20px;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--accent-green), var(--accent-cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px rgba(0, 255, 65, 0.2);
+            letter-spacing: 2px;
+        }
+
+        .subtitle {
+            font-size: 11px;
+            color: var(--text-muted);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            font-family: 'Share Tech Mono', monospace;
+        }
+
+        .subtitle .cursor {
+            display: inline-block;
+            width: 2px;
+            height: 12px;
+            background: var(--accent-green);
+            animation: blink 1s step-end infinite;
+            margin-left: 4px;
+        }
+
+        @keyframes blink {
+            0%,
+            100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0;
+            }
+        }
+
+        .status-indicators {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 11px;
+            color: var(--text-muted);
+            letter-spacing: 1px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent-green);
+            animation: pulse-dot 2s ease-in-out infinite;
+            box-shadow: 0 0 10px rgba(0, 255, 65, 0.3);
+        }
+
+        .status-dot.inactive {
+            background: var(--danger);
+            animation: none;
+        }
+
+        @keyframes pulse-dot {
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.5;
+                transform: scale(0.8);
+            }
+        }
+
+        .model-badge {
+            font-size: 10px;
+            padding: 6px 14px;
+            border: 1px solid rgba(0, 255, 65, 0.2);
+            border-radius: 20px;
+            color: var(--accent-green);
+            background: rgba(0, 255, 65, 0.05);
+            letter-spacing: 1px;
+            font-family: 'Share Tech Mono', monospace;
+        }
+
+        .ghost-btn {
+            background: none;
+            border: 1px solid rgba(255, 23, 68, 0.3);
+            color: var(--text-muted);
+            padding: 6px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 12px;
+            font-family: 'Share Tech Mono', monospace;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+        }
+
+        .ghost-btn:hover {
+            color: var(--danger);
+            border-color: var(--danger);
+            box-shadow: 0 0 20px rgba(255, 23, 68, 0.2);
+            transform: scale(1.05);
+        }
+
+        /* Chat Area */
+        .chat {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px 24px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .chat::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .chat::-webkit-scrollbar-track {
+            background: var(--bg-primary);
+        }
+
+        .chat::-webkit-scrollbar-thumb {
+            background: var(--accent-green);
+            border-radius: 10px;
+        }
+
+        /* Welcome Screen */
+        .welcome {
+            margin: auto;
+            text-align: center;
+            max-width: 600px;
+            animation: fadeInUp 0.8s ease;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .welcome .glitch-text {
+            font-family: 'Orbitron', monospace;
+            font-size: 32px;
+            font-weight: 900;
+            color: var(--accent-green);
+            text-shadow: 0 0 30px rgba(0, 255, 65, 0.2);
+            margin-bottom: 12px;
+            position: relative;
+        }
+
+        .welcome .glitch-text::before {
+            content: '>> ACCESS GRANTED';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            color: var(--accent-cyan);
+            animation: glitch 3s infinite;
+            opacity: 0;
+        }
+
+        @keyframes glitch {
+            0%,
+            90%,
+            100% {
+                opacity: 0;
+                transform: translate(0);
+            }
+            92% {
+                opacity: 1;
+                transform: translate(-2px, 2px);
+            }
+            94% {
+                opacity: 0;
+                transform: translate(2px, -2px);
+            }
+            96% {
+                opacity: 1;
+                transform: translate(-1px, 1px);
+            }
+            98% {
+                opacity: 0;
+                transform: translate(1px, -1px);
+            }
+        }
+
+        .welcome .sub-glow {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-bottom: 24px;
+            letter-spacing: 2px;
+        }
+
+        .welcome .sub-glow code {
+            background: rgba(0, 255, 65, 0.05);
+            padding: 4px 12px;
+            border-radius: 4px;
+            color: var(--accent-green);
+            border: 1px solid rgba(0, 255, 65, 0.1);
+            font-size: 12px;
+        }
+
+        .suggestions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .chip {
+            background: rgba(0, 255, 65, 0.03);
+            border: 1px solid rgba(0, 255, 65, 0.15);
+            color: var(--text-primary);
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 12px;
+            font-family: 'Share Tech Mono', monospace;
+            transition: all 0.3s ease;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .chip::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 65, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .chip:hover::before {
+            left: 100%;
+        }
+
+        .chip:hover {
+            border-color: var(--accent-green);
+            box-shadow: 0 0 30px rgba(0, 255, 65, 0.1), inset 0 0 30px rgba(0, 255, 65, 0.05);
+            transform: translateY(-2px);
+        }
+
+        /* Messages */
+        .msg {
+            display: flex;
+            gap: 14px;
+            max-width: 85%;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px) scale(0.98);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .msg.user {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+
+        .msg.bot {
+            align-self: flex-start;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
+            background: var(--bg-panel);
+            border: 1px solid rgba(0, 255, 65, 0.1);
+            position: relative;
+        }
+
+        .msg.user .avatar {
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-cyan));
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.2);
+        }
+
+        .msg.bot .avatar {
+            background: linear-gradient(135deg, var(--accent-green), var(--accent-cyan));
+            border-color: var(--accent-green);
+            box-shadow: 0 0 20px rgba(0, 255, 65, 0.2);
+            animation: avatar-pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes avatar-pulse {
+            0%,
+            100% {
+                box-shadow: 0 0 20px rgba(0, 255, 65, 0.2);
+            }
+            50% {
+                box-shadow: 0 0 40px rgba(0, 255, 65, 0.4);
+            }
+        }
+
+        .bubble-wrapper {
+            min-width: 0;
+            max-width: 100%;
+        }
+
+        .bubble {
+            padding: 14px 20px;
+            border-radius: 16px;
+            font-size: 14px;
+            line-height: 1.7;
+            white-space: pre-wrap;
+            word-break: break-word;
+            font-family: 'Share Tech Mono', monospace;
+            position: relative;
+        }
+
+        .msg.user .bubble {
+            background: linear-gradient(135deg, rgba(123, 47, 252, 0.15), rgba(0, 212, 255, 0.05));
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-top-right-radius: 4px;
+        }
+
+        .msg.bot .bubble {
+            background: rgba(0, 255, 65, 0.02);
+            border: 1px solid rgba(0, 255, 65, 0.1);
+            border-top-left-radius: 4px;
+        }
+
+        .msg.bot .bubble::before {
+            content: '>';
+            position: absolute;
+            top: -10px;
+            left: 10px;
+            font-size: 10px;
+            color: var(--text-muted);
+            opacity: 0.5;
+        }
+
+        .bubble code {
+            background: rgba(0, 0, 0, 0.4);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 13px;
+            color: var(--accent-cyan);
+            border: 1px solid rgba(0, 212, 255, 0.1);
+        }
+
+        .bubble pre {
+            background: rgba(0, 0, 0, 0.6);
+            padding: 14px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 8px 0;
+            border: 1px solid rgba(0, 255, 65, 0.1);
+            position: relative;
+        }
+
+        .bubble pre::before {
+            content: '◉ OUTPUT';
+            position: absolute;
+            top: -8px;
+            right: 10px;
+            background: var(--bg-primary);
+            padding: 0 10px;
+            font-size: 9px;
+            color: var(--text-muted);
+            letter-spacing: 2px;
+        }
+
+        .bubble pre code {
+            background: none;
+            padding: 0;
+            color: var(--accent-green);
+            border: none;
+        }
+
+        .msg-meta {
+            font-size: 10px;
+            color: var(--text-muted);
+            margin-top: 6px;
+            letter-spacing: 1px;
+            opacity: 0.6;
+        }
+
+        .error .bubble {
+            border-color: var(--danger) !important;
+            color: var(--danger);
+            background: rgba(255, 23, 68, 0.05) !important;
+        }
+
+        .error .bubble::before {
+            content: '⚠ ERROR';
+            color: var(--danger) !important;
+            opacity: 1 !important;
+        }
+
+        /* Typing Indicator */
+        .typing .bubble {
+            display: flex;
+            gap: 6px;
+            padding: 18px 24px;
+            background: rgba(0, 255, 65, 0.02);
+        }
+
+        .typing .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent-green);
+            animation: typing-blink 1.4s ease-in-out infinite;
+        }
+
+        .typing .dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        .typing .dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing-blink {
+            0%,
+            80%,
+            100% {
+                opacity: 0.2;
+                transform: scale(0.8);
+            }
+            40% {
+                opacity: 1;
+                transform: scale(1.2);
+            }
+        }
+
+        /* Composer */
+        .composer {
+            padding: 16px 24px 20px;
+            border-top: 1px solid rgba(0, 255, 65, 0.1);
+            background: rgba(17, 17, 34, 0.95);
+            backdrop-filter: blur(10px);
+            flex-shrink: 0;
+            position: relative;
+            z-index: 5;
+        }
+
+        .composer form {
+            display: flex;
+            gap: 12px;
+            align-items: flex-end;
+            position: relative;
+        }
+
+        #input {
+            flex: 1;
+            resize: none;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(0, 255, 65, 0.15);
+            border-radius: 12px;
+            color: var(--text-primary);
+            padding: 14px 18px;
+            font-size: 14px;
+            font-family: 'Share Tech Mono', monospace;
+            max-height: 140px;
+            outline: none;
+            transition: all 0.3s ease;
+            letter-spacing: 0.5px;
+        }
+
+        #input:focus {
+            border-color: var(--accent-green);
+            box-shadow: 0 0 30px rgba(0, 255, 65, 0.05), inset 0 0 30px rgba(0, 255, 65, 0.02);
+        }
+
+        #input::placeholder {
+            color: var(--text-muted);
+            opacity: 0.5;
+        }
+
+        #send-btn {
+            width: 52px;
+            height: 52px;
+            border-radius: 12px;
+            border: none;
+            background: linear-gradient(135deg, var(--accent-green), var(--accent-cyan));
+            color: #0a0a0f;
+            font-size: 20px;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            font-weight: 900;
+        }
+
+        #send-btn::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(135deg, var(--accent-green), var(--accent-cyan), var(--accent-green));
+            border-radius: 14px;
+            z-index: -1;
+            background-size: 300% 300%;
+            animation: gradient-shift 3s ease infinite;
+        }
+
+        @keyframes gradient-shift {
+            0%,
+            100% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+        }
+
+        #send-btn:hover:not(:disabled) {
+            transform: scale(1.05) translateY(-2px);
+            box-shadow: 0 0 40px rgba(0, 255, 65, 0.3);
+        }
+
+        #send-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .hint {
+            font-size: 10px;
+            color: var(--text-muted);
+            margin-top: 10px;
+            text-align: center;
+            letter-spacing: 1px;
+            opacity: 0.4;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .app {
+                height: 100vh;
+                border-radius: 0;
+                width: 100vw;
+            }
+
+            .msg {
+                max-width: 92%;
+            }
+
+            .subtitle {
+                display: none;
+            }
+
+            .brand-text h1 {
+                font-size: 16px;
+            }
+
+            .status-indicators {
+                gap: 10px;
+            }
+
+            .status-item span:not(.status-dot) {
+                display: none;
+            }
+
+            .topbar {
+                padding: 12px 16px;
+            }
+
+            .chat {
+                padding: 16px;
+            }
+
+            .composer {
+                padding: 12px 16px 16px;
+            }
+
+            .welcome .glitch-text {
+                font-size: 24px;
+            }
+        }
+
+        /* Terminal-like glitch effect on hover */
+        .msg.bot:hover .bubble {
+            border-color: rgba(0, 255, 65, 0.3);
+            box-shadow: 0 0 40px rgba(0, 255, 65, 0.02);
+        }
+
+        /* Power indicator */
+        .power-indicator {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 9px;
+            color: var(--text-muted);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .power-indicator .bar {
+            width: 30px;
+            height: 2px;
+            background: var(--accent-green);
+            border-radius: 2px;
+            animation: power-pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes power-pulse {
+            0%,
+            100% {
+                opacity: 1;
+                width: 30px;
+            }
+            50% {
+                opacity: 0.5;
+                width: 20px;
+            }
+        }
+
+        /* Terminal cursor in welcome */
+        .terminal-cursor {
+            display: inline-block;
+            width: 8px;
+            height: 20px;
+            background: var(--accent-green);
+            animation: blink 1s step-end infinite;
+            vertical-align: text-bottom;
+            margin-left: 2px;
+        }
+
+        /* Matrix Canvas */
+        canvas#matrix {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.06;
+            pointer-events: none;
+            z-index: 0;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Matrix Rain Canvas -->
+    <canvas id="matrix"></canvas>
+
+    <div class="app">
+        <!-- Top Bar -->
+        <header class="topbar">
+            <div class="brand">
+                <div class="logo-container">
+                    <span class="logo">🕷️</span>
+                    <div class="logo-ring"></div>
+                </div>
+                <div class="brand-text">
+                    <h1>NEOCHAT</h1>
+                    <div class="subtitle">
+                        <span class="cursor"></span> AI HACKER INTERFACE v3.1
+                    </div>
+                </div>
+            </div>
+            <div class="status-indicators">
+                <div class="status-item">
+                    <span class="status-dot"></span>
+                    <span>LIVE</span>
+                </div>
+                <div class="model-badge" id="model-badge">⟐ MODEL: —</div>
+                <button id="clear-btn" class="ghost-btn">⌨ CLEAR</button>
+            </div>
+        </header>
+
+        <!-- Chat Area -->
+        <main id="chat" class="chat" aria-live="polite">
+            <div class="welcome">
+                <div class="glitch-text">>> ACCESS GRANTED</div>
+                <div class="sub-glow">
+                    <code>◈</code> OMEGATECH API SECURE CHANNEL <code>◈</code>
+                </div>
+                <p style="font-size:13px; color: var(--text-muted); margin-bottom: 8px; letter-spacing: 1px;">
+                    ENTER YOUR QUERY BELOW
+                </p>
+                <div class="suggestions">
+                    <button class="chip">> reverse_shell.py</button>
+                    <button class="chip">> sql_injection</button>
+                    <button class="chip">> port_scanner</button>
+                    <button class="chip">> wpa2_crack</button>
+                    <button class="chip">> payload_generator</button>
+                </div>
+            </div>
+        </main>
+
+        <!-- Composer -->
+        <footer class="composer">
+            <form id="form">
+                <textarea id="input" rows="1" placeholder="λ type your command… (Enter to send)" maxlength="4000"></textarea>
+                <button id="send-btn" type="submit" aria-label="Send">↵</button>
+            </form>
+            <div class="hint">
+                <span>⚡ encrypted channel • no logs • </span>
+                <span class="power-indicator">
+                    <span class="bar"></span>
+                    SECURE
+                </span>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // Matrix Rain Effect
+        (function matrixRain() {
+            const canvas = document.getElementById('matrix');
+            const ctx = canvas.getContext('2d');
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const columns = Math.floor(canvas.width / 20);
+            const drops = Array(columns).fill(1);
+
+            function draw() {
+                ctx.fillStyle = 'rgba(10, 10, 15, 0.05)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                ctx.fillStyle = '#00ff41';
+                ctx.font = '14px monospace';
+
+                for (let i = 0; i < drops.length; i++) {
+                    const text = String.fromCharCode(0x30A0 + Math.random() * 96);
+                    ctx.fillText(text, i * 20, drops[i] * 20);
+
+                    if (drops[i] * 20 > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+
+            setInterval(draw, 50);
+
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        })();
+
+        // Chat Logic
+        const chatEl = document.getElementById("chat");
+        const form = document.getElementById("form");
+        const input = document.getElementById("input");
+        const sendBtn = document.getElementById("send-btn");
+        const clearBtn = document.getElementById("clear-btn");
+        const modelBadge = document.getElementById("model-badge");
+
+        const STORAGE_KEY = "wormgpt-history";
+
+        function loadHistory() {
+            try { return JSON.parse(sessionStorage.getItem(STORAGE_KEY)) || []; } catch { return []; }
+        }
+
+        function saveHistory() {
+            const items = [...chatEl.querySelectorAll(".msg")].map(m => ({
+                role: m.classList.contains("user") ? "user" : "bot",
+                text: m.querySelector(".text")?.innerText || "",
+                meta: m.querySelector(".msg-meta")?.innerText || "",
+                isError: m.classList.contains("error"),
+            }));
+            sessionStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+        }
+
+        function renderHistory() {
+            chatEl.innerHTML = "";
+            const history = loadHistory();
+            if (!history.length) return showWelcome();
+            history.forEach(m => {
+                if (m.role === "welcome") return;
+                appendMessage(m.role, m.text, m.meta, m.isError);
+            });
+            scrollBottom();
+        }
+
+        function showWelcome() {
+            chatEl.innerHTML = `<div class="welcome">
+                <div class="glitch-text">>> ACCESS GRANTED</div>
+                <div class="sub-glow">
+                    <code>◈</code> OMEGATECH API SECURE CHANNEL <code>◈</code>
+                </div>
+                <p style="font-size:13px; color: var(--text-muted); margin-bottom: 8px; letter-spacing: 1px;">
+                    ENTER YOUR QUERY BELOW
+                </p>
+                <div class="suggestions">
+                    <button class="chip">> reverse_shell.py</button>
+                    <button class="chip">> sql_injection</button>
+                    <button class="chip">> port_scanner</button>
+                    <button class="chip">> wpa2_crack</button>
+                    <button class="chip">> payload_generator</button>
+                </div>
+            </div>`;
+            chatEl.querySelectorAll(".chip").forEach(c =>
+                c.addEventListener("click", () => send(c.textContent.replace('> ', ''))));
+        }
+
+        function escapeHtml(s) {
+            return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+        }
+
+        function renderContent(text) {
+            const blocks = [];
+            text = text.replace(/```(\w*)\n?([\s\S]*?)```/g, (_, lang, code) => {
+                blocks.push(code.trim());
+                return `\u0000${blocks.length - 1}\u0000`;
+            });
+            let html = escapeHtml(text)
+                .replace(/`([^`\n]+)`/g, "<code>$1</code>")
+                .replace(/\u0000(\d+)\u0000/g, (_, i) =>
+                    `<pre><code>${escapeHtml(blocks[+i])}</code></pre>`);
+            return html;
+        }
+
+        function appendMessage(role, text, meta = "", isError = false) {
+            const welcome = chatEl.querySelector(".welcome");
+            if (welcome) welcome.remove();
+
+            const msg = document.createElement("div");
+            msg.className = `msg ${role}${isError ? " error" : ""}`;
+
+            const avatar = document.createElement("div");
+            avatar.className = "avatar";
+            avatar.textContent = role === "user" ? "👤" : "🕷️";
+
+            const wrapper = document.createElement("div");
+            wrapper.className = "bubble-wrapper";
+
+            const bubble = document.createElement("div");
+            bubble.className = "bubble text";
+            bubble.innerHTML = renderContent(text);
+            wrapper.appendChild(bubble);
+
+            if (meta) {
+                const m = document.createElement("div");
+                m.className = "msg-meta";
+                m.textContent = `◈ ${meta}`;
+                wrapper.appendChild(m);
+            }
+
+            msg.appendChild(avatar);
+            msg.appendChild(wrapper);
+            chatEl.appendChild(msg);
+            saveHistory();
+            scrollBottom();
+        }
+
+        function showTyping() {
+            const welcome = chatEl.querySelector(".welcome");
+            if (welcome) welcome.remove();
+            const t = document.createElement("div");
+            t.className = "msg bot typing";
+            t.id = "typing";
+            t.innerHTML = `<div class="avatar">🕷️</div>
+                <div class="bubble-wrapper">
+                    <div class="bubble"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+                </div>`;
+            chatEl.appendChild(t);
+            scrollBottom();
+        }
+
+        function removeTyping() { document.getElementById("typing")?.remove(); }
+
+        function scrollBottom() {
+            chatEl.scrollTop = chatEl.scrollHeight;
+        }
+
+        async function send(message) {
+            message = (message || input.value).trim();
+            if (!message) return;
+
+            input.value = "";
+            autoGrow();
+            appendMessage("user", message);
+            showTyping();
+            sendBtn.disabled = true;
+
+            try {
+                const res = await fetch("/api/chat", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ message }),
+                });
+                const data = await res.json();
+                removeTyping();
+
+                if (!data.success) throw new Error(data.error || "Request failed");
+
+                modelBadge.textContent = `⟐ MODEL: ${data.model}`;
+                const meta = data.meta?.timestamp ?
+                    `${data.model} • ${new Date(data.meta.timestamp).toLocaleTimeString()}` :
+                    data.model;
+                appendMessage("bot", data.answer, meta);
+            } catch (err) {
+                removeTyping();
+                appendMessage("bot", `⚠ ${err.message}`, "", true);
+            } finally {
+                sendBtn.disabled = false;
+                input.focus();
+            }
+        }
+
+        form.addEventListener("submit", e => { e.preventDefault();
+            send(); });
+
+        input.addEventListener("keydown", e => {
+            if (e.key === "Enter" && !e.shiftKey) { e.preventDefault();
+                send(); }
+        });
+        input.addEventListener("input", autoGrow);
+
+        function autoGrow() {
+            input.style.height = "auto";
+            input.style.height = Math.min(input.scrollHeight, 140) + "px";
+        }
+
+        clearBtn.addEventListener("click", () => {
+            if (!confirm("Clear the conversation?")) return;
+            sessionStorage.removeItem(STORAGE_KEY);
+            renderHistory();
+        });
+
+        document.addEventListener("click", e => {
+            if (e.target.classList.contains("chip")) {
+                const text = e.target.textContent.replace('> ', '');
+                send(text);
+            }
+        });
+
+        renderHistory();
+
+        // Keyboard shortcut: Ctrl+Enter to send
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+                e.preventDefault();
+                send();
+            }
+        });
+
+        // Auto-focus on load
+        setTimeout(() => input.focus(), 100);
+    </script>
+</body>
+</html>
